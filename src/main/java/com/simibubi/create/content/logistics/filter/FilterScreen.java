@@ -29,10 +29,20 @@ public class FilterScreen extends AbstractFilterScreen<FilterMenu> {
 	private Component ignoreDataN = Lang.translateDirect(PREFIX + "ignore_data");
 	private Component ignoreDataDESC = Lang.translateDirect(PREFIX + "ignore_data.description");
 
+	private Component allowAnyN = Lang.translateDirect("gui.attribute_filter.allow_list_disjunctive");
+	private Component allowAnyDESC = Lang.translateDirect("gui.attribute_filter.allow_list_disjunctive.description");
+	private Component allowAllN = Lang.translateDirect("gui.attribute_filter.allow_list_conjunctive");
+	private Component allowAllDESC = Lang.translateDirect("gui.attribute_filter.allow_list_conjunctive.description");
+
+
 	private IconButton whitelist, blacklist;
 	private IconButton respectNBT, ignoreNBT;
+
 	private Indicator whitelistIndicator, blacklistIndicator;
 	private Indicator respectNBTIndicator, ignoreNBTIndicator;
+
+	private IconButton matchAny, matchAll;
+	private Indicator matchAnyIndicator, matchAllIndicator;
 
 	public FilterScreen(FilterMenu menu, Inventory inv, Component title) {
 		super(menu, inv, title, AllGuiTextures.FILTER);
@@ -78,22 +88,42 @@ public class FilterScreen extends AbstractFilterScreen<FilterMenu> {
 		ignoreNBTIndicator = new Indicator(x + 78, y + 69, Components.immutableEmpty());
 		addRenderableWidgets(respectNBT, ignoreNBT, respectNBTIndicator, ignoreNBTIndicator);
 
+
+		//respect nbt - match all
+		//ignore nbt - match any
+
+		matchAll = new IconButton(x + 102, y + 75, AllIcons.I_WHITELIST_AND);
+		matchAll.withCallback(() -> {
+			menu.matchAll = true;
+			sendOptionUpdate(Option.ADD_TAG);
+		});
+		matchAll.setToolTip(allowAllN);
+
+		matchAny= new IconButton(x + 120, y + 75, AllIcons.I_WHITELIST_OR);
+		matchAny.withCallback(() -> {
+			menu.matchAll = false;
+			sendOptionUpdate(Option.ADD_INVERTED_TAG);
+		});
+		matchAny.setToolTip(allowAnyN);
+		matchAllIndicator= new Indicator(x + 102, y + 69, Components.immutableEmpty());
+		matchAnyIndicator = new Indicator(x + 120, y + 69, Components.immutableEmpty());
+		addRenderableWidgets(matchAll, matchAny, matchAllIndicator, matchAnyIndicator);
 		handleIndicators();
 	}
 
 	@Override
 	protected List<IconButton> getTooltipButtons() {
-		return Arrays.asList(blacklist, whitelist, respectNBT, ignoreNBT);
+		return Arrays.asList(blacklist, whitelist, respectNBT, ignoreNBT, matchAll, matchAny);
 	}
 
 	@Override
 	protected List<MutableComponent> getTooltipDescriptions() {
-		return Arrays.asList(denyDESC.plainCopy(), allowDESC.plainCopy(), respectDataDESC.plainCopy(), ignoreDataDESC.plainCopy());
+		return Arrays.asList(denyDESC.plainCopy(), allowDESC.plainCopy(), respectDataDESC.plainCopy(), ignoreDataDESC.plainCopy(), allowAllDESC.plainCopy(), allowAnyDESC.plainCopy());
 	}
 
 	@Override
 	protected List<Indicator> getIndicators() {
-		return Arrays.asList(blacklistIndicator, whitelistIndicator, respectNBTIndicator, ignoreNBTIndicator);
+		return Arrays.asList(blacklistIndicator, whitelistIndicator, respectNBTIndicator, ignoreNBTIndicator, matchAllIndicator, matchAnyIndicator);
 	}
 
 	@Override
@@ -106,6 +136,10 @@ public class FilterScreen extends AbstractFilterScreen<FilterMenu> {
 			return !menu.respectNBT;
 		if (button == ignoreNBT)
 			return menu.respectNBT;
+		if (button == matchAll)
+			return !menu.matchAll;
+		if (button == matchAny)
+			return menu.matchAll;
 		return true;
 	}
 
@@ -119,6 +153,10 @@ public class FilterScreen extends AbstractFilterScreen<FilterMenu> {
 			return menu.respectNBT;
 		if (indicator == ignoreNBTIndicator)
 			return !menu.respectNBT;
+		if (indicator == matchAllIndicator)
+			return menu.matchAll;
+		if (indicator == matchAnyIndicator)
+			return !menu.matchAll;
 		return false;
 	}
 

@@ -35,7 +35,7 @@ public class FilterItemStack {
 	public static FilterItemStack of(CompoundTag tag) {
 		return of(ItemStack.of(tag));
 	}
-	
+
 	public static FilterItemStack empty() {
 		return of(ItemStack.EMPTY);
 	}
@@ -47,16 +47,16 @@ public class FilterItemStack {
 	public CompoundTag serializeNBT() {
 		return filterItemStack.serializeNBT();
 	}
-	
+
 	public ItemStack item() {
 		return filterItemStack;
 	}
-	
+
 	public FluidStack fluid(Level level) {
 		resolveFluid(level);
 		return filterFluidStack;
 	}
-	
+
 	public boolean isFilterItem() {
 		return filterItemStack.getItem() instanceof FilterItem;
 	}
@@ -94,7 +94,7 @@ public class FilterItemStack {
 	}
 
 	//
-	
+
 	private void resolveFluid(Level world) {
 		if (!fluidExtracted) {
 			fluidExtracted = true;
@@ -115,6 +115,7 @@ public class FilterItemStack {
 		public List<FilterItemStack> containedItems;
 		public boolean shouldRespectNBT;
 		public boolean isBlacklist;
+		public boolean isMatchAll;
 
 		protected ListFilterItemStack(ItemStack filter) {
 			super(filter);
@@ -134,12 +135,20 @@ public class FilterItemStack {
 			isBlacklist = defaults ? false
 				: filter.getTag()
 					.getBoolean("Blacklist");
+			isMatchAll = defaults ? false
+					: filter.getTag().getBoolean("MatchAll");
 		}
 
 		@Override
 		public boolean test(Level world, ItemStack stack, boolean matchNBT) {
 			if (containedItems.isEmpty())
 				return super.test(world, stack, matchNBT);
+			if (isMatchAll) {
+				for (FilterItemStack filterItemStack : containedItems)
+					if (!(filterItemStack.test(world, stack, shouldRespectNBT)))
+						return isBlacklist;
+				return !isBlacklist;
+			}
 			for (FilterItemStack filterItemStack : containedItems)
 				if (filterItemStack.test(world, stack, shouldRespectNBT))
 					return !isBlacklist;

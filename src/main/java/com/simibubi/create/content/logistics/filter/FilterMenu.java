@@ -14,6 +14,7 @@ public class FilterMenu extends AbstractFilterMenu {
 
 	boolean respectNBT;
 	boolean blacklist;
+	boolean matchAll;
 
 	public FilterMenu(MenuType<?> type, int id, Inventory inv, FriendlyByteBuf extraData) {
 		super(type, id, inv, extraData);
@@ -57,6 +58,7 @@ public class FilterMenu extends AbstractFilterMenu {
 		CompoundTag tag = filterItem.getOrCreateTag();
 		respectNBT = tag.getBoolean("RespectNBT");
 		blacklist = tag.getBoolean("Blacklist");
+		matchAll = tag.getBoolean("MatchAll");
 	}
 
 	@Override
@@ -65,8 +67,9 @@ public class FilterMenu extends AbstractFilterMenu {
 		CompoundTag tag = filterItem.getOrCreateTag();
 		tag.putBoolean("RespectNBT", respectNBT);
 		tag.putBoolean("Blacklist", blacklist);
+		tag.putBoolean("MatchAll", matchAll);
 
-		if (respectNBT || blacklist)
+		if (respectNBT || blacklist || matchAll)
 			return;
 		for (int i = 0; i < ghostInventory.getSlots(); i++)
 			if (!ghostInventory.getStackInSlot(i)

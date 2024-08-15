@@ -54,6 +54,12 @@ public class FilterScreenPacket extends SimplePacketBase {
 					c.respectNBT = true;
 				if (option == Option.IGNORE_DATA)
 					c.respectNBT = false;
+				//add attribute = match all
+				//add negative attribute = match any
+				if (option == Option.ADD_TAG)
+					c.matchAll = true;
+				if (option == Option.ADD_INVERTED_TAG)
+					c.matchAll = false;
 				if (option == Option.UPDATE_FILTER_ITEM)
 					c.ghostInventory.setStackInSlot(
 							data.getInt("Slot"),
